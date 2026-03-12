@@ -10,37 +10,48 @@
 ## PROGRAM
 server.py
 ```
-import socket
-s = socket.socket()
-s.bind(('localhost',8002))
-s.listen(5)
-c, addr = s.accept()
-ListSize = int(input("Enter the number of frames to send : "))
-List = list(range(ListSize))
-WindowSize = int(input("Enter Window Size : "))
-st, i = 0, 0
-while True:
-    while(i < ListSize):
-        st += WindowSize
-        c.send(str(List[i:st]).encode())
-        Acknowledgment = c.recv(1024).decode()
-        if Acknowledgment:
-            print(Acknowledgment)
-            i+=st
+import socket 
+s = socket.socket() 
+s.bind(('localhost', 8000)) 
+s.listen(1) 
+print("Waiting for connection...") 
+conn, addr = s.accept() 
+print("Connected to", addr) 
+while True: 
+    data = conn.recv(1024).decode() 
+    if not data: 
+        break 
+    print("Frames received:", data) 
+    ack = "ACK for " + data 
+    conn.send(ack.encode()) 
+conn.close()
 ```
 client.py
 ```
-import socket
-s = socket.socket()
-s.connect(('localhost', 8002))
-while True:
-    print(s.recv(1024).decode())
-    s.send("Acknowledgement received from the server".encode())
+import socket 
+s = socket.socket() 
+s.connect(('localhost', 8000)) 
+n = int(input("Enter number of frames: ")) 
+w = int(input("Enter window size: ")) 
+frames = list(range(1, n+1)) 
+i = 0 
+while i < n: 
+    send_frames = frames[i:i+w] 
+    msg = " ".join(map(str, send_frames)) 
+    print("Sending frames:", msg) 
+    s.send(msg.encode()) 
+    ack = s.recv(1024).decode() 
+    print("Received:", ack) 
+    i += w 
+s.close()
 ```
 
 
 ## OUPUT
-<img width="1486" height="452" alt="image" src="https://github.com/user-attachments/assets/9094586e-e606-4cab-be48-06e128c5bd84" />
+<img width="1081" height="939" alt="Screenshot 2026-03-12 141157" src="https://github.com/user-attachments/assets/0bb9b8de-9d64-40e9-8111-a1e5d2b4df27" />
+<img width="899" height="966" alt="Screenshot 2026-03-12 141234" src="https://github.com/user-attachments/assets/01b8b321-770b-4c0a-9383-8bc58536bd24" />
+
+
 
 ## RESULT
 Thus, python program to perform stop and wait protocol was successfully executed
